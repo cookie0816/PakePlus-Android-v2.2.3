@@ -15,29 +15,25 @@
             user-select: none;
         }
 
-        body {
-            background: #f0f4fa;
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #ffffff;
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 16px;
         }
 
+        /* 全屏主容器，移除手机模拟器样式 */
         .phone-app {
-            max-width: 420px;
             width: 100%;
+            height: 100vh;
+            height: 100dvh; /* 移动端全屏高度 */
             background: #ffffff;
-            border-radius: 48px;
-            box-shadow: 0 30px 55px -20px rgba(0, 0, 0, 0.3);
             overflow: hidden;
             position: relative;
-            height: 780px;
             display: flex;
             flex-direction: column;
-            backdrop-filter: blur(0px);
-            transition: all 0.2s;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
         .main-header {
@@ -298,10 +294,6 @@
             from { transform: translateY(30px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
-        @media (max-width: 450px) {
-            .phone-app { height: 710px; }
-            .question-text { font-size: 17px; }
-        }
     </style>
 </head>
 <body>
@@ -343,7 +335,7 @@
         <button class="btn btn-secondary" id="prevBtn">◀ 上一题</button>
         <button class="btn btn-primary" id="nextBtn">下一题 ▶</button>
     </div>
-    <div class="footer-hint">✨ 左滑卡片 = 判错 / 右滑或点击卡片主体 = 判对 | 先点选答案 | 弹窗后点击任意位置关闭</div>
+    <div class="footer-hint">✨ 左滑卡片 = 判错 / 右滑或点击卡片判对 | 先选答案 | 弹窗后点击任意位置关闭</div>
 </div>
 
 <script>
@@ -379,6 +371,54 @@
     // 手势变量
     let touchStartX = 0, touchStartY = 0;
     let isDragging = false;
+
+    // ====================== 本地存储记忆功能 ======================
+    const STORAGE_KEY = "ZHIBEN_APP_DATA";
+
+    // 保存所有数据到本地
+    function saveToLocal() {
+        try {
+            const data = {
+                masterCards,
+                currentMode,
+                currentIndex,
+                randomOrderList,
+                randomHistoryIndex,
+                lastFileName: fileInfoSpan.innerText
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        } catch (e) {
+            console.log("本地存储保存失败", e);
+        }
+    }
+
+    // 从本地加载数据
+    function loadFromLocal() {
+        try {
+            const str = localStorage.getItem(STORAGE_KEY);
+            if (!str) return false;
+            const data = JSON.parse(str);
+            
+            masterCards = data.masterCards || [];
+            currentMode = data.currentMode || "all";
+            currentIndex = data.currentIndex || 0;
+            randomOrderList = data.randomOrderList || [];
+            randomHistoryIndex = data.randomHistoryIndex || 0;
+            
+            if (data.lastFileName) {
+                fileInfoSpan.innerText = data.lastFileName;
+            }
+            return true;
+        } catch (e) {
+            console.log("本地存储加载失败", e);
+            return false;
+        }
+    }
+
+    // 清空本地存储
+    function clearLocal() {
+        localStorage.removeItem(STORAGE_KEY);
+    }
 
     // ---------- 自定义弹窗 ----------
     function showResultModal(isCorrect, correctAnswerStr, analysisText) {
@@ -428,6 +468,7 @@
             const unmasteredCnt = masterCards.filter(c => c.proficiency < 1).length;
             randomStatusSpan.innerText = unmasteredCnt ? `🎲 随机池: ${unmasteredCnt} 题` : `🎉 恭喜！全部掌握 ✨`;
         }
+        saveToLocal();
     }
 
     function rebuildRandomPool() {
@@ -443,6 +484,7 @@
         if (unCount === 0) randomStatusSpan.innerText = `🏆 完美掌握！`;
         else randomStatusSpan.innerText = `🎲 随机池: ${unCount} 题`;
         if (currentMode === "random") buildCurrentList();
+        saveToLocal();
     }
 
     function buildCurrentList() {
@@ -480,8 +522,7 @@
         if (isCorrect) {
             if (card.proficiency < 3) card.proficiency += 1;
             if (card.wrongFlag === true) {
-                if (!card.wrongCorrectCount) card.wrongCorrectCount = 0;
-                card.wrongCorrectCount += 1;
+                card.wrongCorrectCount = (card.wrongCorrectCount || 0) + 1;
                 if (card.wrongCorrectCount >= 3) {
                     card.wrongFlag = false;
                     card.wrongCorrectCount = 0;
@@ -495,25 +536,27 @@
             if (card.proficiency > 0) card.proficiency -= 1;
             card.wrongFlag = true;
             card.wrongCorrectCount = 0;
-            if (card.proficiency < 0) card.proficiency = 0;
         }
+        
         const masterCard = masterCards.find(c => c.id === card.id);
         if (masterCard) {
             masterCard.proficiency = card.proficiency;
             masterCard.wrongFlag = card.wrongFlag;
             masterCard.wrongCorrectCount = card.wrongCorrectCount;
         }
+
         if (currentMode === "random" && card.proficiency >= 1) {
-            const newOrder = randomOrderList.filter(id => id !== card.id);
-            randomOrderList = newOrder;
+            randomOrderList = randomOrderList.filter(id => id !== card.id);
             randomHistoryIndex = Math.min(randomHistoryIndex, randomOrderList.length - 1);
             if (randomHistoryIndex < 0) randomHistoryIndex = 0;
             randomStatusSpan.innerText = `🎲 随机池: ${randomOrderList.length} 题`;
         }
         updateMetaStats();
         buildCurrentList();
+        
         const newIdx = currentList.findIndex(c => c.id === card.id);
         if (newIdx !== -1) currentIndex = newIdx;
+        saveToLocal();
     }
 
     function resetCardSelectionUI() {
@@ -523,11 +566,19 @@
         });
     }
 
-    function escapeHtml(str) { return String(str).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+    function escapeHtml(str) { 
+        return String(str).replace(/[&<>"]/g, m => ({
+            '&':'&amp;',
+            '<':'&lt;',
+            '>':'&gt;',
+            '"':'&quot;'
+        }[m])); 
+    }
 
     function renderCurrentCard() {
         if (!masterCards.length || currentList.length === 0) {
-            let msg = currentMode === 'wrong' ? '📭 错题本为空，去答题吧' : (currentMode === 'random' ? '✨ 随机池已清空！上传新题或重置默认' : '📂 请上传 Excel 题库');
+            let msg = currentMode === 'wrong' ? '📭 错题本为空，去答题吧' : 
+                      (currentMode === 'random' ? '✨ 随机池已清空！上传新题或重置默认' : '📂 请上传 Excel 题库');
             container.innerHTML = `<div class="empty-state"><div style="font-size:52px;">🧠</div><h3 style="margin-top:10px;">${msg}</h3><p style="font-size:12px; color:#6b7280;">点击上方上传或重置</p></div>`;
             return;
         }
@@ -540,6 +591,7 @@
         const optionKeys = ['A', 'B', 'C', 'D'];
         let optionsHtml = `<div class="options-area">`;
         if (isMulti) optionsHtml += `<div class="multi-hint">☑️ 多选题 · 可点选多个选项</div>`;
+        
         optionKeys.forEach(letter => {
             const optText = card.options[letter];
             if (optText && optText.trim()) {
@@ -553,7 +605,8 @@
         });
         optionsHtml += `</div>`;
         
-        const modeName = currentMode === 'wrong' ? '⚠️ 错题歼灭' : (currentMode === 'random' ? '🎲 随机强化' : '📘 顺序精学');
+        const modeName = currentMode === 'wrong' ? '⚠️ 错题歼灭' : 
+                        (currentMode === 'random' ? '🎲 随机强化' : '📘 顺序精学');
         const cardHtml = `
             <div class="quiz-card" id="quizCard">
                 <div class="quiz-content">
@@ -573,12 +626,11 @@
                 if (isAnswered) return;
                 const optVal = div.dataset.opt;
                 if (isMulti) {
-                    if (div.classList.contains('selected')) {
-                        div.classList.remove('selected');
-                        currentSelectedOptions = currentSelectedOptions.filter(v => v !== optVal);
-                    } else {
-                        div.classList.add('selected');
+                    div.classList.toggle('selected');
+                    if(div.classList.contains('selected')){
                         currentSelectedOptions.push(optVal);
+                    }else{
+                        currentSelectedOptions = currentSelectedOptions.filter(v => v !== optVal);
                     }
                 } else {
                     optDivs.forEach(d => d.classList.remove('selected'));
@@ -600,6 +652,7 @@
                 }
             });
         }
+        saveToLocal();
     }
     
     let touchMovedFlag = false;
@@ -644,14 +697,14 @@
             const hintDiv = document.querySelector('.next-hint');
             if (hintDiv) {
                 const originalText = hintDiv.innerHTML;
-                hintDiv.style.backgroundColor = "#ffe1e0";
+                hintDiv.style.cssText = "background-color:#ffe1e0; transition:0.2s;";
                 hintDiv.innerHTML = "⚠️ 请先点击选择一个答案再滑动";
                 setTimeout(() => {
                     if (hintDiv) {
                         hintDiv.style.backgroundColor = "";
                         hintDiv.innerHTML = originalText;
                     }
-                }, 800);
+                }, 900);
             }
             return;
         }
@@ -659,12 +712,7 @@
         const evalRes = evaluateAnswer(card, currentSelectedOptions);
         if (!evalRes) return;
         
-        let finalIsCorrect;
-        if (direction === 'right') {
-            finalIsCorrect = evalRes.isCorrect;
-        } else {
-            finalIsCorrect = false;
-        }
+        let finalIsCorrect = direction === 'right' ? evalRes.isCorrect : false;
         
         showResultModal(finalIsCorrect, evalRes.correctAnswerStr, evalRes.analysis);
         commitResult(card, finalIsCorrect);
@@ -672,16 +720,14 @@
         
         setTimeout(() => {
             if (currentList.length > 0) {
-                let nextIdx = currentIndex + 1;
-                if (nextIdx >= currentList.length) nextIdx = 0;
-                currentIndex = nextIdx;
+                currentIndex = (currentIndex + 1) % currentList.length;
                 if (currentMode === "random") randomHistoryIndex = currentIndex;
                 isAnswered = false;
                 renderCurrentCard();
             } else {
                 buildCurrentList();
             }
-        }, 1200);
+        }, 1300);
     }
     
     function prevCard() {
@@ -703,20 +749,19 @@
     function switchMode(mode) {
         currentMode = mode;
         modeTabs.forEach(tab => {
-            if (tab.dataset.mode === mode) tab.classList.add('active');
-            else tab.classList.remove('active');
+            tab.classList.toggle('active', tab.dataset.mode === mode);
         });
         randomBar.style.display = mode === "random" ? "flex" : "none";
         currentIndex = 0;
         isAnswered = false;
         if (mode === "random") rebuildRandomPool();
         buildCurrentList();
+        saveToLocal();
     }
     
     function resetRandomPoolManually() {
         if (currentMode !== "random") return;
         rebuildRandomPool();
-        buildCurrentList();
         currentIndex = 0;
         isAnswered = false;
         renderCurrentCard();
@@ -727,6 +772,7 @@
             const workbook = XLSX.read(dataBuffer, { type: 'array' });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
             let rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+            
             if (!rows.length) {
                 const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
                 if (raw.length < 2) return null;
@@ -738,8 +784,10 @@
                     rows.push(obj);
                 }
             }
+            
             const newCards = [];
             const colMap = { answer:null, question:null, optA:null, optB:null, optC:null, optD:null, analysis:null };
+            
             for (let key in rows[0]) {
                 const k = key.toLowerCase();
                 if (k.includes('答案')||k==='answer') colMap.answer = key;
@@ -750,19 +798,27 @@
                 else if (k.includes('选项d')||k==='d') colMap.optD = key;
                 else if (k.includes('解析')||k.includes('analysis')) colMap.analysis = key;
             }
+            
             for (let row of rows) {
                 const answerRaw = colMap.answer ? String(row[colMap.answer]||"").trim().toUpperCase() : "";
                 const ques = colMap.question ? String(row[colMap.question]||"").trim() : "";
                 if (!ques || !answerRaw) continue;
+                
                 let isMultiple = answerRaw.includes(',') || answerRaw.includes('，');
                 let correctAnswers = [];
+                
                 if (isMultiple) {
                     let parts = answerRaw.split(/[,，]+/);
-                    parts.forEach(p => { let t = p.trim(); if (['A','B','C','D'].includes(t)) correctAnswers.push(t); });
+                    parts.forEach(p => { 
+                        let t = p.trim(); 
+                        if (['A','B','C','D'].includes(t)) correctAnswers.push(t); 
+                    });
+                    isMultiple = correctAnswers.length > 1;
                 } else {
                     if (['A','B','C','D'].includes(answerRaw)) correctAnswers = [answerRaw];
-                    else correctAnswers = ['A'];
+                    else continue;
                 }
+                
                 newCards.push({
                     id: Date.now() + Math.random() * 10000 + newCards.length,
                     question: ques,
@@ -782,7 +838,10 @@
                 });
             }
             return newCards;
-        } catch(e) { return null; }
+        } catch(e) { 
+            console.error("解析失败",e);
+            return null; 
+        }
     }
     
     function handleExcelUpload(file) {
@@ -790,17 +849,22 @@
         reader.onload = e => {
             const newData = parseExcelToCards(e.target.result);
             if (newData && newData.length) {
+                clearLocal();
                 masterCards = newData;
                 fileInfoSpan.innerText = `📁 ${file.name} (${masterCards.length}题)`;
                 rebuildRandomPool();
                 if (currentMode !== "all") switchMode("all");
                 else { buildCurrentList(); updateMetaStats(); }
-            } else { alert("解析失败，请检查列格式: 题目/答案/选项A~D/答案解析"); }
+                saveToLocal();
+            } else { 
+                alert("解析失败，请检查Excel格式：必须包含【题目、答案、选项A-D、解析】"); 
+            }
         };
         reader.readAsArrayBuffer(file);
     }
     
     function loadDefault() {
+        clearLocal();
         masterCards = [
             { id:101, question:"Vue.js 属于以下哪种框架类型？", options:{A:"JavaScript库",B:"渐进式框架",C:"编译型框架",D:"UI组件库"}, type:"single", correctAnswer:"B", correctAnswers:null, analysis:"Vue 是渐进式JavaScript框架，核心库只关注视图层。", proficiency:0, wrongFlag:false, wrongCorrectCount:0 },
             { id:102, question:"以下哪些是 JavaScript 基本数据类型？（多选）", options:{A:"String",B:"Number",C:"Boolean",D:"Object"}, type:"multiple", correctAnswer:null, correctAnswers:["A","B","C"], analysis:"基本类型:String,Number,Boolean,Null,Undefined,Symbol，Object是引用类型。", proficiency:0, wrongFlag:false, wrongCorrectCount:0 },
@@ -811,9 +875,15 @@
         rebuildRandomPool();
         if (currentMode !== "all") switchMode("all");
         else { buildCurrentList(); updateMetaStats(); }
+        saveToLocal();
     }
     
-    function resetToDefault() { loadDefault(); if(excelInput) excelInput.value=''; }
+    function resetToDefault() {
+        if(confirm("确定要重置为默认题库吗？所有进度将清空！")){
+            loadDefault();
+            excelInput.value = '';
+        }
+    }
     
     function bindEvents() {
         prevBtn.onclick = prevCard;
@@ -824,8 +894,15 @@
         modeTabs.forEach(tab => tab.onclick = () => switchMode(tab.dataset.mode));
     }
     
+    // 初始化
     bindEvents();
-    loadDefault();
+    const hasLocal = loadFromLocal();
+    if (!hasLocal) {
+        loadDefault();
+    } else {
+        rebuildRandomPool();
+        buildCurrentList();
+    }
 </script>
 </body>
 </html>
