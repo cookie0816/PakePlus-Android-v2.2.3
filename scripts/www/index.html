@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>刷题狗</title>
+    <title>智记本 · 手势弹窗判题 | 滑动学习卡</title>
     <!-- SheetJS 解析 Excel -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     <style>
@@ -271,7 +271,11 @@
             background: #f43f5e;
             color: white;
         }
-        .modal-correct .modal-header, .modal-wrong .modal-header {
+        .modal-complete {
+            background: #4f46e5;
+            color: white;
+        }
+        .modal-correct .modal-header, .modal-wrong .modal-header, .modal-complete .modal-header {
             background: rgba(0,0,0,0.05);
         }
         .modal-body strong {
@@ -299,7 +303,7 @@
 <body>
 <div class="phone-app">
     <div class="main-header">
-        <div class="logo-area"><h1>刷题狗</h1><p> </p></div>
+        <div class="logo-area"><h1>智记本</h1><p>✧ 左滑判错 · 右滑正确</p></div>
         <div class="stats-group">
             <div class="stats-badge"><div class="count" id="totalCardsCount">0</div><div class="label">总题量</div></div>
             <div class="stats-badge wrong-badge"><div class="count" id="wrongCount">0</div><div class="label">错题本</div></div>
@@ -335,7 +339,7 @@
         <button class="btn btn-secondary" id="prevBtn">◀ 上一题</button>
         <button class="btn btn-primary" id="nextBtn">下一题 ▶</button>
     </div>
-    <div class="footer-hint">✨ 左滑= 强制判错 / 右滑或点击卡片识别正确答案
+    <div class="footer-hint">✨ 左滑卡片 = 判错 / 右滑或点击卡片判对 | 先选答案 | 弹窗后点击任意位置关闭</div>
 </div>
 
 <script>
@@ -442,6 +446,38 @@
                 <div><strong>📌 正确答案：</strong> ${escapeHtml(correctAnswerStr)}</div>
                 <div style="margin-top: 10px;"><strong>📖 解析：</strong> ${escapeHtml(analysisText)}</div>
                 <div class="close-tip">👇 点击任意位置关闭弹窗</div>
+            </div>
+        `;
+        
+        modalOverlay.appendChild(modalCard);
+        document.body.appendChild(modalOverlay);
+        
+        const closeModal = () => {
+            if (modalOverlay && modalOverlay.parentNode) modalOverlay.remove();
+        };
+        modalOverlay.addEventListener('click', closeModal);
+        modalCard.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    // 新增：全部完成弹窗
+    function showCompleteModal() {
+        const oldModal = document.querySelector('.custom-modal');
+        if(oldModal) oldModal.remove();
+        
+        const modalOverlay = document.createElement('div');
+        modalOverlay.className = 'custom-modal';
+        
+        const modalCard = document.createElement('div');
+        modalCard.className = 'modal-card modal-complete';
+        
+        modalCard.innerHTML = `
+            <div class="modal-header">
+                🎉 恭喜完成全部答题
+            </div>
+            <div class="modal-body">
+                <div>✅ 你已经完成当前模式下所有题目的作答！</div>
+                <div style="margin-top:10px;">📚 可以切换模式继续刷题，或重新复习巩固知识。</div>
+                <div class="close-tip">👇 点击任意位置关闭</div>
             </div>
         `;
         
@@ -618,7 +654,7 @@
                     <div style="font-size:10px; color:#7c3aed; margin-bottom:10px; font-weight:600;">${modeName}</div>
                     <div class="question-text">${escapeHtml(fullQuestion)}</div>
                     ${optionsHtml}
-                    <div class="next-hint" style="background:transparent; color:#8192ac; margin-top:16px;">👈 左滑强制判错 | 右滑识别正确答案</div>
+                    <div class="next-hint" style="background:transparent; color:#8192ac; margin-top:16px;">👈 左滑判错 | 右滑/点击卡片判对 | 先选答案</div>
                 </div>
             </div>
         `;
@@ -725,10 +761,21 @@
         
         setTimeout(() => {
             if (currentList.length > 0) {
+                // 判断是否即将到达最后一题
+                const isLastQuestion = (currentIndex === currentList.length - 1);
+                
+                // 切换下一题
                 currentIndex = (currentIndex + 1) % currentList.length;
                 if (currentMode === "random") randomHistoryIndex = currentIndex;
                 isAnswered = false;
                 renderCurrentCard();
+
+                // 如果是最后一题，弹出完成提醒
+                if (isLastQuestion) {
+                    setTimeout(() => {
+                        showCompleteModal();
+                    }, 300);
+                }
             } else {
                 buildCurrentList();
             }
@@ -745,10 +792,20 @@
     
     function nextCard() {
         if (!currentList.length) return;
+        
+        const isLastQuestion = (currentIndex === currentList.length - 1);
+        
         currentIndex = (currentIndex + 1) % currentList.length;
         if (currentMode === "random") randomHistoryIndex = currentIndex;
         isAnswered = false;
         renderCurrentCard();
+
+        // 最后一题点击下一题也触发完成弹窗
+        if (isLastQuestion) {
+            setTimeout(() => {
+                showCompleteModal();
+            }, 300);
+        }
     }
     
     function switchMode(mode) {
