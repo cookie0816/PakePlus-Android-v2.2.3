@@ -34,7 +34,6 @@
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
-        /* 小篆印章风格 Logo - 红底白字 */
         .logo-area {
             display: flex;
             align-items: baseline;
@@ -44,8 +43,8 @@
             font-family: "华文篆书", "STZhuanSong", "KaiTi", "Noto Serif SC", serif;
             font-size: 28px;
             font-weight: 500;
-            background-color: #c33c2e;  /* 沉稳朱红底 */
-            color: #ffffff;              /* 白字 */
+            background-color: #c33c2e;
+            color: #ffffff;
             padding: 4px 16px 6px 16px;
             border-radius: 48px;
             letter-spacing: 3px;
@@ -115,7 +114,6 @@
         .func-card-main:active { transform: scale(0.96); background: #fbfdff; }
         .func-emoji-big { font-size: 44px; margin-bottom: 10px; }
         .func-name-main { font-weight: 700; font-size: 16px; color: #1f2b48; margin-bottom: 6px; }
-        /* 去掉了描述 .func-desc-main，彻底移除 */
         .func-badge-new { background: #eef2ff; font-size: 8px; border-radius: 40px; padding: 2px 10px; display: inline-block; margin-top: 8px; color: #2563eb; }
 
         .my-library-fullscreen {
@@ -132,6 +130,8 @@
             padding: 12px 18px;
             background: white;
             border-bottom: 1px solid #eff1f5;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         .lib-back-btn {
             background: #f1f4f9;
@@ -149,7 +149,11 @@
             font-weight: 700;
             color: #1e2f44;
         }
-        .lib-full-upload {
+        .lib-upload-area {
+            display: flex;
+            gap: 10px;
+        }
+        .lib-full-upload, .lib-download-template {
             background: #3b82f6;
             border: none;
             color: white;
@@ -158,6 +162,9 @@
             font-size: 11px;
             font-weight: 500;
             cursor: pointer;
+        }
+        .lib-download-template {
+            background: #10b981;
         }
         .library-list-full {
             flex: 1;
@@ -428,69 +435,37 @@
 
     <div id="functionPanel" class="function-dashboard">
         <div class="func-grid-main">
-            <div class="func-card-main" data-func="all">
-                <div class="func-emoji-big">📖</div>
-                <div class="func-name-main">顺序练习</div>
-                <div class="func-badge-new">渐进掌握</div>
-            </div>
-            <div class="func-card-main" data-func="random">
-                <div class="func-emoji-big">🎲</div>
-                <div class="func-name-main">随机练习</div>
-                <div class="func-badge-new">挑战反应</div>
-            </div>
-            <div class="func-card-main" data-func="wrong">
-                <div class="func-emoji-big">⚠️</div>
-                <div class="func-name-main">错题本</div>
-                <div class="func-badge-new">精准攻克</div>
-            </div>
-            <div class="func-card-main" data-func="recite">
-                <div class="func-emoji-big">🧠</div>
-                <div class="func-name-main">自主背题</div>
-                <div class="func-badge-new">沉浸记忆</div>
-            </div>
-            <div class="func-card-main" data-func="exam_soon">
-                <div class="func-emoji-big">📝</div>
-                <div class="func-name-main">模拟考试</div>
-                <div class="func-badge-new">即将开放</div>
-            </div>
-            <div class="func-card-main" data-func="mylibrary">
-                <div class="func-emoji-big">📚</div>
-                <div class="func-name-main">我的题库</div>
-                <div class="func-badge-new">Excel导入</div>
-            </div>
+            <div class="func-card-main" data-func="all"><div class="func-emoji-big">📖</div><div class="func-name-main">顺序练习</div><div class="func-badge-new">渐进掌握</div></div>
+            <div class="func-card-main" data-func="random"><div class="func-emoji-big">🎲</div><div class="func-name-main">随机练习</div><div class="func-badge-new">挑战反应</div></div>
+            <div class="func-card-main" data-func="wrong"><div class="func-emoji-big">⚠️</div><div class="func-name-main">错题本</div><div class="func-badge-new">精准攻克</div></div>
+            <div class="func-card-main" data-func="recite"><div class="func-emoji-big">🧠</div><div class="func-name-main">自主背题</div><div class="func-badge-new">沉浸记忆</div></div>
+            <div class="func-card-main" data-func="exam_soon"><div class="func-emoji-big">📝</div><div class="func-name-main">模拟考试</div><div class="func-badge-new">即将开放</div></div>
+            <div class="func-card-main" data-func="mylibrary"><div class="func-emoji-big">📚</div><div class="func-name-main">我的题库</div><div class="func-badge-new">Excel导入</div></div>
         </div>
     </div>
 
     <div id="myLibraryPanel" class="my-library-fullscreen" style="display: none;">
-        <div class="lib-full-header"><div class="lib-back-btn" id="libBackBtn">← 返回大厅</div><div class="lib-full-title">📚 我的题库</div><button class="lib-full-upload" id="libUploadBtn">➕ 上传题库</button></div>
+        <div class="lib-full-header">
+            <div class="lib-back-btn" id="libBackBtn">← 返回大厅</div>
+            <div class="lib-full-title">📚 我的题库</div>
+            <div class="lib-upload-area">
+                <button class="lib-download-template" id="downloadTemplateBtn">📎 下载模版</button>
+                <button class="lib-full-upload" id="libUploadBtn">➕ 上传题库</button>
+            </div>
+        </div>
         <div class="library-list-full" id="libraryListFullContainer"></div>
-        <div class="lib-footer-hint">💡 多选答案用英文逗号隔开 (如 A,B,C) 自动添加(多选)标识</div>
+        <div class="lib-footer-hint">💡 多选题答案支持 "ABC" / "A,B,C" / "A B C" 自动识别 | 可下载模版参考格式</div>
     </div>
 
-    <!-- 刷题面板 -->
     <div id="quizPanel" class="quiz-panel" style="display: none;">
-        <div class="back-home-bar">
-            <div class="back-home-btn" id="backHomeBtn">← 返回大厅</div>
-            <div class="current-lib-badge" id="currentLibNameBadge">默认题库</div>
-        </div>
-        <div class="mode-reset-bar">
-            <div class="mode-tabs" id="modeTabs">
-                <div class="mode-tab active" data-mode="all">顺序</div>
-                <div class="mode-tab" data-mode="random">随机</div>
-                <div class="mode-tab" data-mode="wrong">错题本</div>
-            </div>
-            <button class="reset-mode-btn" id="resetModeBtn">🔄 重置进度</button>
-        </div>
-        <div class="quiz-stats-area">
-            <div class="progress-section"><div class="progress-info"><span>📈 掌握进度</span><span id="progressText">0 / 0</span></div><div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div></div>
-            <div id="randomBarContainer" style="display: none;"><div class="random-bar"><span class="random-status" id="randomStatus">🎲 随机练习池</span><button id="resetRandomBtn" class="reset-random">🔄 重置随机池</button></div></div>
-        </div>
+        <div class="back-home-bar"><div class="back-home-btn" id="backHomeBtn">← 返回大厅</div><div class="current-lib-badge" id="currentLibNameBadge">默认题库</div></div>
+        <div class="mode-reset-bar"><div class="mode-tabs" id="modeTabs"><div class="mode-tab active" data-mode="all">顺序</div><div class="mode-tab" data-mode="random">随机</div><div class="mode-tab" data-mode="wrong">错题本</div></div><button class="reset-mode-btn" id="resetModeBtn">🔄 重置进度</button></div>
+        <div class="quiz-stats-area"><div class="progress-section"><div class="progress-info"><span>📈 掌握进度</span><span id="progressText">0 / 0</span></div><div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div></div><div id="randomBarContainer" style="display: none;"><div class="random-bar"><span class="random-status" id="randomStatus">🎲 随机练习池</span><button id="resetRandomBtn" class="reset-random">🔄 重置随机池</button></div></div></div>
         <div id="cardSwipeContainer" class="card-swipe-container"></div>
         <div class="action-buttons"><button class="btn btn-secondary" id="prevBtn">◀ 上一题</button><button class="btn btn-primary" id="nextBtn">下一题 ▶</button></div>
         <div class="footer-hint">👈 左滑=判题 | 右滑=加入错题本 👉</div>
     </div>
 
-    <!-- 自主背题面板 -->
     <div id="recitePanel" class="recite-panel" style="display: none;">
         <div class="back-home-bar"><div class="back-home-btn" id="reciteBackBtn">← 返回大厅</div><div class="current-lib-badge" id="reciteLibBadge">默认题库</div></div>
         <div style="padding: 6px 16px 0;"><div class="progress-section"><div class="progress-info"><span>🧠 背诵进度</span><span id="reciteProgressText">0 / 0</span></div><div class="progress-bar-bg"><div class="progress-fill" id="reciteProgressFill"></div></div></div></div>
@@ -513,6 +488,7 @@
     const reciteBackBtn = document.getElementById('reciteBackBtn');
     const libBackBtn = document.getElementById('libBackBtn');
     const libUploadBtn = document.getElementById('libUploadBtn');
+    const downloadTemplateBtn = document.getElementById('downloadTemplateBtn');
     const libraryListFullContainer = document.getElementById('libraryListFullContainer');
     const container = document.getElementById('cardSwipeContainer');
     const reciteContainer = document.getElementById('reciteCardContainer');
@@ -671,7 +647,7 @@
             showResultModal(finalCorrect, card.correctAnswer || "参考答案", card.analysis || "无解析");
             commitResult(card, finalCorrect);
             isAnswered = true;
-            setTimeout(()=>{ if(currentList.length) { const isLast = currentIndex === currentList.length-1; currentIndex = (currentIndex+1)%currentList.length; if(currentMode==="random") randomHistoryIndex=currentIndex; isAnswered=false; renderCard(); if(isLast) showComplete(); saveCurrentProgress(); } },1200);
+            setTimeout(()=>{ if(currentList.length) { currentIndex = (currentIndex+1)%currentList.length; if(currentMode==="random") randomHistoryIndex=currentIndex; isAnswered=false; renderCard(); if(currentIndex===0) showComplete(); saveCurrentProgress(); } },1200);
             return;
         }
         let finalCorrect = false;
@@ -687,7 +663,7 @@
         }
         commitResult(card, finalCorrect);
         isAnswered = true;
-        setTimeout(()=>{ if(currentList.length) { const isLast = currentIndex === currentList.length-1; currentIndex = (currentIndex+1)%currentList.length; if(currentMode==="random") randomHistoryIndex=currentIndex; isAnswered=false; renderCard(); if(isLast) showComplete(); saveCurrentProgress(); } },1200);
+        setTimeout(()=>{ if(currentList.length) { currentIndex = (currentIndex+1)%currentList.length; if(currentMode==="random") randomHistoryIndex=currentIndex; isAnswered=false; renderCard(); if(currentIndex===0) showComplete(); saveCurrentProgress(); } },1200);
     }
 
     function saveCurrentProgress() {
@@ -698,8 +674,18 @@
         saveData();
     }
 
-    function getCorrectAnswerStr(card) { if(card.type === 'multiple') return (card.correctAnswers||[]).sort().join('、'); return card.correctAnswer || ''; }
-    function evaluateAnswer(card, selected) { if(!selected.length) return null; const correct = (card.type === 'multiple') ? [...card.correctAnswers].sort() : [card.correctAnswer]; const user = [...selected].sort(); const isCorrect = user.length===correct.length && user.every((v,i)=>v===correct[i]); return { isCorrect, correctAnswerStr: getCorrectAnswerStr(card), analysis: card.analysis }; }
+    function getCorrectAnswerStr(card) { 
+        if(card.type === 'multiple') return (card.correctAnswers||[]).sort().join('、');
+        return card.correctAnswer || ''; 
+    }
+
+    function evaluateAnswer(card, selected) {
+        if(!selected.length) return null;
+        const correctRaw = (card.type === 'multiple') ? [...card.correctAnswers].sort() : [card.correctAnswer];
+        const userSorted = [...selected].sort();
+        const isCorrect = userSorted.length===correctRaw.length && userSorted.every((v,i)=>v===correctRaw[i]);
+        return { isCorrect, correctAnswerStr: getCorrectAnswerStr(card), analysis: card.analysis };
+    }
 
     function commitResult(card, isCorrect) {
         const lib = getCurrentLib();
@@ -745,11 +731,41 @@
     function recitePrev() { if(reciteList.length) { reciteIndex = (reciteIndex-1+reciteList.length)%reciteList.length; renderRecite(); saveData(); } }
     function reciteNext() { if(reciteList.length) { reciteIndex = (reciteIndex+1)%reciteList.length; renderRecite(); saveData(); } }
 
-    function parseMultiAnswer(rawAnswer) { if (!rawAnswer) return []; let str = String(rawAnswer).trim().toUpperCase(); str = str.replace(/[，、;；\s]+/g, ','); const parts = str.split(',').map(p => p.trim()).filter(p => /^[A-D]$/.test(p)); const unique = [...new Set(parts)]; unique.sort(); return unique; }
+    function parseMultiAnswerFuzzy(rawAnswer) {
+        if (!rawAnswer) return [];
+        let str = String(rawAnswer).trim().toUpperCase();
+        let cleaned = str.replace(/[,，、;；\s]+/g, '');
+        if (/^[A-D]+$/.test(cleaned)) {
+            return cleaned.split('').filter(l => /[A-D]/.test(l)).sort();
+        }
+        let parts = str.split(/[,，、;；\s]+/);
+        let letters = [];
+        for (let p of parts) {
+            p = p.trim();
+            if (/^[A-D]$/.test(p)) letters.push(p);
+        }
+        const unique = [...new Set(letters)];
+        unique.sort();
+        return unique;
+    }
 
-    function uploadNewLibrary() { const input = document.createElement('input'); input.type='file'; input.accept='.xlsx,.xls,.csv'; input.onchange = (e) => { const file = e.target.files[0]; if(!file) return; showLoading("解析中..."); const reader = new FileReader(); reader.onload = ev => { try { const data = new Uint8Array(ev.target.result); const workbook = XLSX.read(data, {type:'array'}); const sheet = workbook.Sheets[workbook.SheetNames[0]]; let rows = XLSX.utils.sheet_to_json(sheet, {defval:""}); if(!rows.length) throw new Error("表格为空"); const newCards = parseExcelEnhanced(rows); if(newCards.length) { const libName = prompt("请输入题库名称", file.name.replace(/\.(xlsx|xls|csv)$/i,'')); if(libName) { libraries.push({ id: Date.now()+''+Math.random(), name: libName, cards: newCards, lastMode: "all", lastIndex: 0, randomOrderList: [], randomHistoryIndex: 0 }); saveData(); renderLibList(); alert(`✅ 成功导入 ${newCards.length} 道题目 (多选已自动添加「多选」标识)`); } } else alert("解析失败，请确保包含题目、答案列，且多选题答案用逗号隔开 (如 A,B,C)"); } catch(err) { alert("解析出错"); } finally { hideLoading(); } }; reader.readAsArrayBuffer(file); }; input.click(); }
+    // 下载Excel模版
+    function downloadTemplate() {
+        const templateData = [
+            { "模块": "示例模块", "题目": "以下哪个是JavaScript框架？", "选项A": "Vue.js", "选项B": "Django", "选项C": "Flask", "选项D": "Spring", "答案": "A", "解析": "Vue.js是前端JS框架" },
+            { "模块": "示例多选", "题目": "以下哪些属于前端技术？（多选）", "选项A": "HTML", "选项B": "CSS", "选项C": "Python", "选项D": "JavaScript", "答案": "A,B,D", "解析": "HTML/CSS/JS是前端三剑客" },
+            { "模块": "简答示例", "题目": "请简述什么是响应式设计", "选项A": "", "选项B": "", "选项C": "", "选项D": "", "答案": "响应式设计是一种让网站兼容不同设备屏幕尺寸的设计方法", "解析": "核心是媒体查询和弹性布局" }
+        ];
+        const ws = XLSX.utils.json_to_sheet(templateData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "题库模版");
+        XLSX.writeFile(wb, `随记_题库模版.xlsx`);
+        showToast("模版下载成功");
+    }
 
-    function parseExcelEnhanced(rows) { const cards = []; let colMap = { module: null, answer: null, question: null, optA: null, optB: null, optC: null, optD: null, analysis: null }; for(let k in rows[0]) { let l = k.toLowerCase(); if(l.includes('模块') || l.includes('module')) colMap.module = k; else if(l.includes('答案') || l === 'answer' || l === 'correct') colMap.answer = k; else if(l.includes('题目') || l === 'question' || l === 'title') colMap.question = k; else if(l.includes('选项a') || l === 'optiona' || l === 'a') colMap.optA = k; else if(l.includes('选项b') || l === 'optionb' || l === 'b') colMap.optB = k; else if(l.includes('选项c') || l === 'optionc' || l === 'c') colMap.optC = k; else if(l.includes('选项d') || l === 'optiond' || l === 'd') colMap.optD = k; else if(l.includes('解析') || l === 'analysis' || l === 'explain') colMap.analysis = k; } if(!colMap.question || !colMap.answer) { const keys = Object.keys(rows[0]); if(keys.length >= 2) { colMap.question = keys[0]; colMap.answer = keys[1]; } else return []; } for(let row of rows) { const ansRaw = colMap.answer ? String(row[colMap.answer] || "").trim() : ""; let quesRaw = colMap.question ? String(row[colMap.question] || "").trim() : ""; if(!quesRaw || ansRaw === "") continue; const mod = colMap.module ? String(row[colMap.module] || "").trim() : ""; const hasOpt = (colMap.optA && row[colMap.optA]) || (colMap.optB && row[colMap.optB]) || (colMap.optC && row[colMap.optC]) || (colMap.optD && row[colMap.optD]); if(!hasOpt) { cards.push({ id: Date.now() + Math.random() * 10000 + cards.length, module: mod, type: "essay", question: quesRaw, options: {}, correctAnswer: ansRaw, correctAnswers: null, analysis: colMap.analysis ? String(row[colMap.analysis] || "").trim() : "无解析", proficiency: 0, wrongFlag: false, wrongFirstAddTime: null, wrongStreak: 0, nextReviewTime: null }); continue; } const multiCandidates = parseMultiAnswer(ansRaw); const isMulti = multiCandidates.length > 1; if(isMulti) { if(!quesRaw.includes('（多选）') && !quesRaw.includes('(多选)')) quesRaw = quesRaw + '（多选）'; cards.push({ id: Date.now() + Math.random() * 10000 + cards.length, module: mod, question: quesRaw, options: { A: colMap.optA ? String(row[colMap.optA] || "").trim() : "", B: colMap.optB ? String(row[colMap.optB] || "").trim() : "", C: colMap.optC ? String(row[colMap.optC] || "").trim() : "", D: colMap.optD ? String(row[colMap.optD] || "").trim() : "" }, type: "multiple", correctAnswer: null, correctAnswers: multiCandidates, analysis: colMap.analysis ? String(row[colMap.analysis] || "").trim() : "无解析", proficiency: 0, wrongFlag: false, wrongFirstAddTime: null, wrongStreak: 0, nextReviewTime: null }); } else { let singleLetter = ansRaw.trim().toUpperCase(); if(/^[A-D]$/.test(singleLetter)) { cards.push({ id: Date.now() + Math.random() * 10000 + cards.length, module: mod, question: quesRaw, options: { A: colMap.optA ? String(row[colMap.optA] || "").trim() : "", B: colMap.optB ? String(row[colMap.optB] || "").trim() : "", C: colMap.optC ? String(row[colMap.optC] || "").trim() : "", D: colMap.optD ? String(row[colMap.optD] || "").trim() : "" }, type: "single", correctAnswer: singleLetter, correctAnswers: null, analysis: colMap.analysis ? String(row[colMap.analysis] || "").trim() : "无解析", proficiency: 0, wrongFlag: false, wrongFirstAddTime: null, wrongStreak: 0, nextReviewTime: null }); } else { cards.push({ id: Date.now() + Math.random() * 10000 + cards.length, module: mod, type: "essay", question: quesRaw, options: {}, correctAnswer: ansRaw, correctAnswers: null, analysis: colMap.analysis ? String(row[colMap.analysis] || "").trim() : "无解析", proficiency: 0, wrongFlag: false, wrongFirstAddTime: null, wrongStreak: 0, nextReviewTime: null }); } } } return cards; }
+    function uploadNewLibrary() { const input = document.createElement('input'); input.type='file'; input.accept='.xlsx,.xls,.csv'; input.onchange = (e) => { const file = e.target.files[0]; if(!file) return; showLoading("解析中..."); const reader = new FileReader(); reader.onload = ev => { try { const data = new Uint8Array(ev.target.result); const workbook = XLSX.read(data, {type:'array'}); const sheet = workbook.Sheets[workbook.SheetNames[0]]; let rows = XLSX.utils.sheet_to_json(sheet, {defval:""}); if(!rows.length) throw new Error("表格为空"); const newCards = parseExcelEnhanced(rows); if(newCards.length) { const libName = prompt("请输入题库名称", file.name.replace(/\.(xlsx|xls|csv)$/i,'')); if(libName) { libraries.push({ id: Date.now()+''+Math.random(), name: libName, cards: newCards, lastMode: "all", lastIndex: 0, randomOrderList: [], randomHistoryIndex: 0 }); saveData(); renderLibList(); alert(`✅ 成功导入 ${newCards.length} 道题目 (多选题答案已模糊识别 "ABC" / "A,B,C" 等格式)`); } } else alert("解析失败，请确保包含题目、答案列，且多选题答案可用字母组合"); } catch(err) { alert("解析出错"); } finally { hideLoading(); } }; reader.readAsArrayBuffer(file); }; input.click(); }
+
+    function parseExcelEnhanced(rows) { const cards = []; let colMap = { module: null, answer: null, question: null, optA: null, optB: null, optC: null, optD: null, analysis: null }; for(let k in rows[0]) { let l = k.toLowerCase(); if(l.includes('模块') || l.includes('module')) colMap.module = k; else if(l.includes('答案') || l === 'answer' || l === 'correct') colMap.answer = k; else if(l.includes('题目') || l === 'question' || l === 'title') colMap.question = k; else if(l.includes('选项a') || l === 'optiona' || l === 'a') colMap.optA = k; else if(l.includes('选项b') || l === 'optionb' || l === 'b') colMap.optB = k; else if(l.includes('选项c') || l === 'optionc' || l === 'c') colMap.optC = k; else if(l.includes('选项d') || l === 'optiond' || l === 'd') colMap.optD = k; else if(l.includes('解析') || l === 'analysis' || l === 'explain') colMap.analysis = k; } if(!colMap.question || !colMap.answer) { const keys = Object.keys(rows[0]); if(keys.length >= 2) { colMap.question = keys[0]; colMap.answer = keys[1]; } else return []; } for(let row of rows) { const ansRaw = colMap.answer ? String(row[colMap.answer] || "").trim() : ""; let quesRaw = colMap.question ? String(row[colMap.question] || "").trim() : ""; if(!quesRaw || ansRaw === "") continue; const mod = colMap.module ? String(row[colMap.module] || "").trim() : ""; const hasOpt = (colMap.optA && row[colMap.optA]) || (colMap.optB && row[colMap.optB]) || (colMap.optC && row[colMap.optC]) || (colMap.optD && row[colMap.optD]); if(!hasOpt) { cards.push({ id: Date.now() + Math.random() * 10000 + cards.length, module: mod, type: "essay", question: quesRaw, options: {}, correctAnswer: ansRaw, correctAnswers: null, analysis: colMap.analysis ? String(row[colMap.analysis] || "").trim() : "无解析", proficiency: 0, wrongFlag: false, wrongFirstAddTime: null, wrongStreak: 0, nextReviewTime: null }); continue; } const multiCandidates = parseMultiAnswerFuzzy(ansRaw); const isMulti = multiCandidates.length > 1; if(isMulti) { if(!quesRaw.includes('（多选）') && !quesRaw.includes('(多选)')) quesRaw = quesRaw + '（多选）'; cards.push({ id: Date.now() + Math.random() * 10000 + cards.length, module: mod, question: quesRaw, options: { A: colMap.optA ? String(row[colMap.optA] || "").trim() : "", B: colMap.optB ? String(row[colMap.optB] || "").trim() : "", C: colMap.optC ? String(row[colMap.optC] || "").trim() : "", D: colMap.optD ? String(row[colMap.optD] || "").trim() : "" }, type: "multiple", correctAnswer: null, correctAnswers: multiCandidates, analysis: colMap.analysis ? String(row[colMap.analysis] || "").trim() : "无解析", proficiency: 0, wrongFlag: false, wrongFirstAddTime: null, wrongStreak: 0, nextReviewTime: null }); } else { let singleLetter = ansRaw.trim().toUpperCase(); if(/^[A-D]$/.test(singleLetter)) { cards.push({ id: Date.now() + Math.random() * 10000 + cards.length, module: mod, question: quesRaw, options: { A: colMap.optA ? String(row[colMap.optA] || "").trim() : "", B: colMap.optB ? String(row[colMap.optB] || "").trim() : "", C: colMap.optC ? String(row[colMap.optC] || "").trim() : "", D: colMap.optD ? String(row[colMap.optD] || "").trim() : "" }, type: "single", correctAnswer: singleLetter, correctAnswers: null, analysis: colMap.analysis ? String(row[colMap.analysis] || "").trim() : "无解析", proficiency: 0, wrongFlag: false, wrongFirstAddTime: null, wrongStreak: 0, nextReviewTime: null }); } else { cards.push({ id: Date.now() + Math.random() * 10000 + cards.length, module: mod, type: "essay", question: quesRaw, options: {}, correctAnswer: ansRaw, correctAnswers: null, analysis: colMap.analysis ? String(row[colMap.analysis] || "").trim() : "无解析", proficiency: 0, wrongFlag: false, wrongFirstAddTime: null, wrongStreak: 0, nextReviewTime: null }); } } } return cards; }
 
     function renderLibList() { if(!libraryListFullContainer) return; libraryListFullContainer.innerHTML = ''; libraries.forEach(lib => { const div = document.createElement('div'); div.className = `library-item-full ${currentLibId===lib.id?'active-lib':''}`; div.innerHTML = `<div class="lib-info-full"><div class="lib-name-full">${escapeHtml(lib.name)}</div><div class="lib-meta-full">${lib.cards.length}题</div></div><div class="lib-actions-full"><button class="lib-action-btn-full" data-action="switch" data-id="${lib.id}">🔁</button><button class="lib-action-btn-full" data-action="rename" data-id="${lib.id}">✏️</button><button class="lib-action-btn-full" data-action="delete" data-id="${lib.id}" ${lib.id==='default'?'disabled style="opacity:0.4"':''}>🗑️</button></div>`; libraryListFullContainer.appendChild(div); }); document.querySelectorAll('.lib-action-btn-full').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); const act=btn.dataset.action, id=btn.dataset.id; if(act==='switch') { if(currentLibId!==id) { currentLibId=id; loadCurrentLib(); initRecite(); renderLibList(); if(quizPanel.style.display==='flex') rebuildList(); if(recitePanel.style.display==='flex') renderRecite(); currentLibNameBadge.innerText=getCurrentLib().name; reciteLibBadge.innerText=getCurrentLib().name; saveData(); } } else if(act==='rename') { const lib=libraries.find(l=>l.id===id); if(lib) { const nn=prompt("新名称",lib.name); if(nn) { lib.name=nn.slice(0,20); saveData(); renderLibList(); if(currentLibId===id) { currentLibNameBadge.innerText=lib.name; reciteLibBadge.innerText=lib.name; } } } } else if(act==='delete' && id!=='default') { if(confirm("删除题库？")) { libraries=libraries.filter(l=>l.id!==id); if(currentLibId===id) { currentLibId=libraries[0].id; loadCurrentLib(); initRecite(); } saveData(); renderLibList(); if(quizPanel.style.display==='flex') rebuildList(); if(recitePanel.style.display==='flex') renderRecite(); currentLibNameBadge.innerText=getCurrentLib().name; reciteLibBadge.innerText=getCurrentLib().name; } } })); }
 
@@ -760,8 +776,9 @@
     document.querySelectorAll('.func-card-main').forEach(c=>c.addEventListener('click',()=>showQuizByMode(c.dataset.func)));
     backHomeBtn.addEventListener('click', backToHome); reciteBackBtn.addEventListener('click', backToHome); libBackBtn.addEventListener('click', backToHome);
     libUploadBtn.addEventListener('click', uploadNewLibrary);
+    if(downloadTemplateBtn) downloadTemplateBtn.addEventListener('click', downloadTemplate);
     prevBtn.addEventListener('click', ()=>{ if(currentList.length) { currentIndex = (currentIndex-1+currentList.length)%currentList.length; if(currentMode==="random") randomHistoryIndex=currentIndex; renderCard(); saveCurrentProgress(); } });
-    nextBtn.addEventListener('click', ()=>{ if(currentList.length) { const isLast = currentIndex===currentList.length-1; currentIndex=(currentIndex+1)%currentList.length; if(currentMode==="random") randomHistoryIndex=currentIndex; renderCard(); if(isLast) showComplete(); saveCurrentProgress(); } });
+    nextBtn.addEventListener('click', ()=>{ if(currentList.length) { currentIndex=(currentIndex+1)%currentList.length; if(currentMode==="random") randomHistoryIndex=currentIndex; renderCard(); if(currentIndex===0) showComplete(); saveCurrentProgress(); } });
     recitePrevBtn.addEventListener('click', recitePrev); reciteNextBtn.addEventListener('click', reciteNext);
     resetRandomBtn.addEventListener('click', ()=>{ if(currentMode==='random') { rebuildRandomPool(); rebuildList(); showToast("随机池已重置并重新打乱"); saveCurrentProgress(); } });
     resetModeBtn.addEventListener('click', resetModeProgress);
